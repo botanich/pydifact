@@ -728,6 +728,10 @@ class EdifactElement:
             file.write(space + f'<{elem_name}/>')
 
     @property
+    def tag(self) -> str:
+        return self._tag
+
+    @property
     def parent(self) -> Union[EdifactComposite, EdifactSegment]:
         return self._parent
 
