@@ -81,6 +81,40 @@ for segment in collection.segments:
 ```
 
 
+## Extension
+Added extension for further parsing EDIFACT file into object. Has support of Segment Groups. Included parsing
+and validating of Interchanges by EDIFACT message structure standards per versions. Also Composites consisting
+of single Element are parsed as composites.
+
+Usage:
+```python
+# demo is for file pydifact/tests/data/invoice2.edi
+
+from pydifact.edifact_extension.edifact_directory \
+    import EdifactInterchange, EdifactMessage, EdifactSegmentGroup, EdifactSegment, EdifactComposite, EdifactElement
+
+interchange = EdifactInterchange.from_file("pydifact/tests/data/invoice2.edi")
+
+for message in interchange.messages:  # message is an instance of EdifactMessage
+    segment_group25_lst = message["SG25"]  # list of all segment groups with tag SG25 in current message
+    for sg25 in segment_group25_lst:
+        segment_lin_lst = sg25["LIN"]  # list of all segments with tag LIN in current segment group
+        # both SG25 in demo file consist of segments: LIN, PIA, QTY, and segment groups SG28, SG38 afterwards
+        segment_pia = sg25[1]
+
+        element4347_lst = segment_pia["4347"]  # list of all elements with tag 4347
+        compositeC212_lst = segment_pia["C212"]  # list of all composites with tag C212
+
+        element0 = segment_pia[0]  # PIA in demo file consists of element on pos 0
+        composite1 = segment_pia[1]  # and composite on pos 1, they are accessible by integer index
+
+        element_value = element0.value
+```
+
+Using extension should be more convenient if you want to validate the document or if you are not sure about
+which segments/composites/elements will be present - that way you can rely on data units' tags and positions
+in the document by EDIFACT documentation, as they may shift using simple Interchange class.
+
 ## Limitations
 
 - No support of optional functional groups (`UNG`→`UNE`),
@@ -89,7 +123,7 @@ for segment in collection.segments:
 
 In python ecosystem:
 
-- [python-edifact](https://github.com/FriedrichK/python-edifact) - simpler, IMHO less cleaner code, less flexible. may be faster though (not tested). Seems unmaintained.
+- [python-edifact](https://github.com/FriedrichK/python-edifact) - simpler, IMHO less clean code, less flexible. may be faster though (not tested). Seems unmaintained.
 - [bots](https://github.com/bots-edi/bots) - huge, with webinterface (bots-monitor), webserver, bots-engine.
 - [edicat](https://github.com/notpeter/edicat) - simple, only for separating lines/segments for CLI-piping.
 
